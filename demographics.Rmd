@@ -1,0 +1,54 @@
+---
+title: "demographics"
+author: "Jennifer Sailor"
+date: "2022-11-12"
+output: html_document
+---
+
+
+```{r echo=FALSE}
+library(Rcpp)
+library(imager)
+library(tictoc)
+library(ggplot2)
+library(jpeg)
+library(magick)
+```
+
+```{r}
+#Josh's code from Testing.R
+reduced_dir <- "C:/Users/jans7/OneDrive - Marquette University/Fall 2022/MSSC 5931 - Topics in Math or Stats/Project/NewFace_23"
+setwd(reduced_dir)
+
+folders <- dir(path = reduced_dir, pattern = NULL, all.files = FALSE,
+               full.names = FALSE, recursive = FALSE,
+               ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+
+#Googled all of this - and if the name was common confirmed with photos
+gender <- c("M","M","F","M","F","M","M","M","M","M",
+            "M","M","M","M","M","M","F","M","M","M",
+            "M","M","M","M","M","M","M","F","F","F","F","M",
+            "M","M","M","M","M","M","M","M","F","F","M",
+            "M","M","F","M","F","M","M","M","M","M",
+            "M","M","M","F","M","M","M","M","M","M",
+            "M","F" )
+occupation <- c("Former President of Peru","Former President of Columbia","French Tennis Player","American Tennis Player","American Actress","Former Prime Minister of Israel","Former Governor of California and Body Builder","Former Prime Minister of India","Former US President","Former President of Argentine Republic",
+            "Former US Secretary of State","Former English Soccer Player","Fomer US Secretary of Defense","Member of the House of Lords of the United Kingdom","Former US President","Former Chancellor of Germany","Member of the Philippine House of Represenatives","Former Governor of California","Argentine Tennis Player","Former President of Afghanistan",
+            "Former Minister for Foreign Affairs of Sweden","Self-proclaimed Professional Swimmer","Former President of the Republic of Venezuela","Former Minister of Foreign Affairs of the Russian Federation","Former Home Secretary of the United Kingdom","Former President of France","Former Prime Minister of Canada","American Actress","American Tennis Player","American Singer","Blonde","British Diplomat",
+            "Former President of the People's Republic of China","Former US Attorney General","Director of National Intelligence of the United States","Former Prime Minister of Spain","Professor in Felinology","Spanish Tennis Player","Former Prime Minister of Japan","Former Secretary General of the United Nations","Former First Lady of the US","American Tennis Player","Australian Tennis Player",
+            "Former President of Brazil","President of the State of Palestine","Former President of the Republic of Indonesia","Former Mayor of New York City","British Actress","Former President of the Argentine Republic","Former Executive Secretary to the Department of State of the US","American Tennis Player","President of Turkey","Former President of Chile",
+            "Former President of South Korea","Former Mayor of New York City","Former President of Iraq","American Tennis Player","Senator of Italy","American Professional Golfer","Former Majority Leader of the US Senate","Former US Sectretary of Homeland Security","Former Prime Minister of the United Kingdom","Former President of Mexico",
+            "President of Russia","American Actress")
+
+(demographics <- data.frame(cbind(folders,gender, occupation)))
+
+```
+
+
+```{r}
+#it is 13 Females to 52 Males
+ggplot(demographics, aes(x = gender, fill = gender)) +
+  geom_histogram(stat = "count")
+```
+
+

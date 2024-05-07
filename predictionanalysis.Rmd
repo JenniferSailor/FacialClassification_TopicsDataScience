@@ -1,0 +1,137 @@
+---
+title: "predictionanalysis"
+author: "Jennifer Sailor"
+date: "2022-11-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+To run: must have run testing.R with all 65 people must have run demographics.Rmd
+
+```{r}
+(var <- table(as.numeric(prediction), as.matrix(test[,1])))
+(var <- table(as.numeric(prediction), as.matrix(val[,1])))
+
+```
+
+How to read this: So it isn't for say not in numerical order because I checked both y and prediction which is what makes this matrix and they are in the correct order
+
+So how to read this beast so if var2_ii is not 20 then check the full column where var2_ii != var2_ii and var2_ii != 0. Here will be var2_ki (row changes but column doesnt) and that k/row number will tell you who it is incorrectly predicting var2_ii as
+
+```{r}
+numberofpics <- 6 #the max number of pictures of an individual in data set
+
+#PART 1
+#finding total accuracy (used later), who was predicted wrong, and accuracy of those predicted wrong
+
+#initiating variables
+sum <- 0 #total sum of those predicted correctly - helps find total accuracy
+wrong_pred <- c() #demographics of individual who is predicted incorrectly
+accuracy_right_4wrong <- c() #the accuracy of individuals who were predicted incorrectly
+
+#loop through table
+for (i in 1:ncol(var)) {
+  
+  sum <- sum + var[i,i]#adding up total along diagonal
+  
+  #if the diagonal is not equal to number of pictures of individual
+  #then atleast of the picture was predicted incorrectly
+  if(var[i,i] != numberofpics){
+    
+    #since individual is predicted incorrectly add demographic 
+    #information to data set corresponding to individuals name
+    #to do this must loop through demographics data frame and find
+    #where names math
+    for(j in 1:nrow(demographics))
+      #if the names match then add demographic information 
+      #to the wrong pred matrix
+      if(folders[i] == demographics[j,1]){
+        wrong_pred <- rbind(wrong_pred, demographics[j,]) 
+      }
+    
+    #since individual is incorrectly predicted
+    #lets find percent that it was correct for individual
+    accuracy_right_4wrong <- c(accuracy_right_4wrong, round(100*var[i,i]/(numberofpics), 2))
+  }
+}
+
+#PART 2
+#finding all names of wrong predictions that respond to individual
+
+#making matrix that nxm where n is number of individuals predicted wrong and m is number of pictures incorrect
+#this makes it so that each row corresponds to indivual is is predicted wrong and each column is the prediction
+predname_wrong <- matrix(nrow = (nrow(wrong_pred)), ncol = (numberofpics-(min(accuracy_right_4wrong)/100*numberofpics)))
+
+#initializing variables that will help know where to add in matrix
+colofmat <- 0 #column of matrix
+rowofmat<-0 #row of matrix
+
+#loop through table
+for (i in 1:ncol(var)) {
+
+  #if the diagonal is not equal to number of pictures of individual
+  #then at least of the picture was predicted incorrectly 
+  if(var[i,i] != numberofpics){
+    #individual was predicted incorrectly atleast once
+    
+    colofmat <- colofmat+1 #add one to column
+    
+    #loop that goes from 1 to number of individuals/which is the number of rows in var
+    for(k in 1:8){
+      #in the column of the the incorrect prediction lets find the who was predicted instead
+      #thus where is column not 0 and not the diagonal position
+      if(var[k,i] != 0 && k != i){
+        #at this position the value was predicted incorrectly and the value of var[k,i] is 
+        #how many times it was predicted this person so we do a for loop up to that value
+        for(s in 1:var[k,i]){
+          rowofmat <- rowofmat +1#add one to the row
+          
+          #put the name of incorrect prediction into the matrix
+          predname_wrong[colofmat,rowofmat] <- folders[k]
+        }
+      }
+    }
+  
+    rowofmat <- 0#resetting the row index to 0
+    
+  }
+  
+}
+
+#PART 3
+#used later
+#finding a list of all the incorrect predictions (probably a more efficient way using var)
+
+#intialize a empty list
+listofnameswrong <- c()
+
+#for loop that goes from 1 to the length of the list of predictions (could use length of y but it is the same)
+for(i in 1:length(as.numeric(prediction))){
+  #if the prediction does not match the matrix this add the name of prediction to list of wrong predictions
+  if(as.numeric(prediction)[i] != as.matrix(y)[i]){
+    listofnameswrong <- c(listofnameswrong, folders[as.numeric(prediction)[i]])
+  }
+}
+
+#PART 4 
+#make data frame
+#this just combines parts 1 and 2 into a pretty dataframe to analyze
+incorrectresults <- data.frame(cbind(wrong_pred, accuracy_right_4wrong, predname_wrong))
+colnames(incorrectresults)[4] <- "Accuracy (%)"
+colnames(incorrectresults)[5] <- "Predicted individual as..."
+incorrectresults[,-3]
+```
+
+```{r}
+#Analysis of above datafram of incorrect results
+paste0("Total Accuracy of the algorithm ", round(100*sum/(numberofpics*8), 2), "%")
+paste0("The name that was predicted the most as someone else was ", max(listofnameswrong), " with a count of ", sum(listofnameswrong == max(listofnameswrong)))
+paste0("The highest number of inaccurate predictions per person was: ", numberofpics-(min(accuracy_right_4wrong)/100*numberofpics))
+#paste0(round(100*sum(incorrectresults$gender == "M")/sum(demographics$gender == "M"),2),"% of the men were detected inaccurately") # (12/52)
+#paste0(round(100*sum(incorrectresults$gender == "F")/sum(demographics$gender == "F"),2), "% of the women were detected inaccurately") #(4/13)
+
+```
+
+
+
